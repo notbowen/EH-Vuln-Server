@@ -1,0 +1,37 @@
+CURE51 FINANCIAL TRADING
+Financial Report - FY2024 Q1 (Jan 1 - Mar 31, 2024)
+
+Revenue:                $89,456,780
+  Trading Income:       $76,234,567
+  Fee Income:           $13,222,213
+Operating Expenses:     $62,345,678
+  Employee Compensation:$45,678,901
+  Technology:           $8,901,234
+  G&A:                  $7,765,543
+Operating Income:       $27,111,102
+
+Other Income/Expenses:
+  Interest Income:      $1,234,567
+  Interest Expense:     ($567,890)
+
+Income Before Taxes:    $27,777,779
+Income Tax Expense:     $6,944,445
+
+Net Income:             $20,833,334
+
+EPS (Basic):            $2.08
+EPS (Diluted):          $2.05
+
+Assets Under Management:$15,678,901,234
+Cash & Equivalents:     $234,567,890
+Total Assets:           $2,345,678,901
+Total Liabilities:      $1,789,012,345
+Stockholders' Equity:   $556,666,556
+
+Key Ratios:
+  Return on Equity:     3.74%
+  Profit Margin:        23.29%
+  Efficiency Ratio:     69.69%
+  Leverage Ratio:       4.21
+
+Note: All figures in USD. This is a quarterly report and not audited.

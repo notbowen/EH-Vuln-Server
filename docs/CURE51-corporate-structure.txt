@@ -1,0 +1,34 @@
+CURE51 FINANCIAL TRADING - Corporate Structure
+
+Executive Leadership:
+- CEO: Sarah Chen
+- CFO: Michael Rodriguez
+- CTO: Aisha Patel
+- Chief Risk Officer: Robert Knowles
+
+Departments:
+1. Trading
+   - Equities Trading
+   - Fixed Income Trading
+   - Derivatives Trading
+   - Forex Trading
+2. Risk Management
+3. Technology & Operations
+4. Research & Analysis
+5. Client Services
+6. Compliance & Legal
+7. Human Resources
+8. Finance & Accounting
+
+Subsidiaries:
+1. Cure51 Asset Management LLC
+2. Cure51 Prime Brokerage Services
+3. Cure51 Ventures (FinTech Investments)
+4. Cure51 Global Markets Ltd. (International Operations)
+
+Board of Directors:
+- Chairperson: Elizabeth Warren (Former regulator)
+- Independent Directors: 
+  - John Smith (Tech Industry Veteran)
+  - Maria González (Risk Management Expert)
+  - David Chang (Academic, Financial Economics)
