@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ldap.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #define LDAP_HOST "ldap://192.168.0.15"  // TODO: Change hard coded IP
 #define LDAP_PORT 389
@@ -55,14 +56,16 @@ int main() {
     LDAP *ld;
     int rc;
     char *username, *password;
-    char bind_dn[256];
+    char bind_dn[32];
     char *query_string;
     char decoded_username[256], decoded_password[256];
 
+    // Prepare the response
+    printf("Content-type: text/html\n\n");
+
     // Get the query string
     query_string = getenv("QUERY_STRING");
-    if(!query_string) {
-        printf("Content-type: text/html\n\n");
+    if(!query_string || *query_string == '\0') {
         printf("<html><body><form><p>Username: <input type=\"text\" name=\"username\"></p><p>Password: <input type=\"password\" name=\"password\"></p><p><input type=\"submit\" value=\"Login\"></p></form></body></html>\n");
         return 1;
     }
@@ -71,12 +74,6 @@ int main() {
     username = get_cgi_param(query_string, "username");
     password = get_cgi_param(query_string, "password");
 
-    if(!username || !password) {
-        printf("Content-type: text/html\n\n");
-        printf("<html><body><form><p>Username: <input type=\"text\" name=\"username\"></p><p>Password: <input type=\"password\" name=\"password\"></p><p><input type=\"submit\" value=\"Login\"></p></form></body></html>\n");
-        return 1;
-    }
-
     // URL decode the username and password
     url_decode(username, decoded_username);
     url_decode(password, decoded_password);
@@ -84,7 +81,6 @@ int main() {
     // Initialize LDAP connection
     rc = ldap_initialize(&ld, LDAP_HOST);
     if (rc != LDAP_SUCCESS) {
-        printf("Content-type: text/plain\n\n");
         printf("Error: ldap_initialize failed: %s\n", ldap_err2string(rc));
         return 1;
     }
@@ -93,13 +89,12 @@ int main() {
     int version = LDAP_VERSION3;
     ldap_set_option(ld, LDAP_OPT_PROTOCOL_VERSION, &version);
 
-    // Construct the bind DN
-    snprintf(bind_dn, sizeof(bind_dn), "%s@cure51.com", decoded_username);
+    // Construct the bind DN vulnerable to buffer overflow
+    strcpy(bind_dn, decoded_username);
 
     // Perform bind operation
     rc = ldap_simple_bind_s(ld, bind_dn, decoded_password);
     if (rc != LDAP_SUCCESS) {
-        printf("Content-type: text/html\n\n");
         printf("<html><body><form><p>Username: <input type=\"text\" name=\"username\"></p><p>Password: <input type=\"password\" name=\"password\"></p><p><input type=\"submit\" value=\"Login\"></p><p style=\"color:red\">Login failed: %s</p></form></body></html>\n", ldap_err2string(rc));
         ldap_unbind_ext_s(ld, NULL, NULL);
         return 1;
@@ -108,16 +103,11 @@ int main() {
     // Unbind and close the connection
     ldap_unbind_ext_s(ld, NULL, NULL);
 
-    // Free allocated memory
-    free(username);
-    free(password);
-
     // Overwrite query string with the command to execute
     snprintf(query_string, strlen(query_string), "./read-files.sh");
 
     // Print the HTML page displaying the output
-    printf("Content-type: text/html\n\n");
-    printf("<html><body><h1>Welcome, %s</h1><pre>", decoded_username);
+    printf("<html><body><h1>Welcome, %s</h1><p>DEBUG: %s</p><pre>", decoded_username, query_string);
 
     // Run command and get output
     FILE *fp = popen(query_string, "r");
