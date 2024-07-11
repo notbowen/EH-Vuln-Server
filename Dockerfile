@@ -18,7 +18,7 @@ COPY cgi-bin/login.c /usr/local/apache2/cgi-bin/
 
 # Compile CGI script
 WORKDIR /usr/local/apache2/cgi-bin/
-RUN gcc -o login.cgi login.c -lldap
+RUN gcc -o login.cgi login.c -lldap -fno-stack-protector
 RUN chmod 755 login.cgi
 
 # Configure Apache
