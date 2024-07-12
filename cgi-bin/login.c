@@ -78,13 +78,11 @@ char *alert_and_return =
 
 void return_html(char *output)
 {
-    printf("Content-type: text/html\n\n");
     printf(html, output);
 }
 
 void return_alert(char *output)
 {
-    printf("Content-type: text/html\n\n");
     printf(alert_and_return, output);
 }
 
@@ -98,11 +96,14 @@ bool verify(char *username, char *password)
     url_decode(username, decoded_username);
     url_decode(password, decoded_password);
 
+    if (decoded_username[0] == '\0' || decoded_password[0] == '\0') {
+        return false;
+    }
+
     rc = ldap_initialize(&ld, LDAP_HOST);
     if (rc != LDAP_SUCCESS)
     {
         fprintf(stderr, "ldap_initialize() failed: %d\n", rc);
-        return_alert("Failed to initialize LDAP");
         return false;
     }
 
@@ -110,20 +111,17 @@ bool verify(char *username, char *password)
     if (rc != LDAP_SUCCESS)
     {
         fprintf(stderr, "ldap_simple_bind_s() failed: %d\n", rc);
-        if (rc == 49) return_alert("Invalid credentials");
-        else return_alert("Failed to bind to LDAP");
         return false;
     }
 
     return true;
 }
 
-char* login()
+void login()
 {
     char buf[512];
     char username[128] = {0};
     char password[128] = {0};
-    char* command = malloc (sizeof (char) * 128);
     int length;
 
     gets(buf);
@@ -148,43 +146,38 @@ char* login()
         }
 
         if (strcmp(name, "username") == 0)
-            strcpy(username, data);
+            sprintf(username, data);
         else if (strcmp(name, "password") == 0)
             strcpy(password, data);
-        else if (strcmp(name, "command") == 0)
-            url_decode(data, command);
     }
 
-    if (verify(username, password)) {
-        if (strncmp(command, "cat", 3) == 0) {
-            return command;
-        } else {
-            return_alert("Invalid command");
-            return "";
-        }
-    } else {
-        return "";
+    if (!verify(username, password)) {
+        printf("<h1>Invalid username(");
+        printf(username);
+        printf(") or password</h1>");
+
+        printf(alert_and_return, "Invalid username or password");
+        return;
     }
+
+    printf("<html><body><h1>Welcome, ");
+    printf(username);
+    printf("</h1><pre>");
+
+    FILE *fp = popen("/bin/bash ./read-files.sh", "r");
+    char buffer[1024];
+    while (fgets(buffer, sizeof(buffer), fp))
+    {
+        printf("%s", buffer);
+    }
+    pclose(fp);
+
+    printf("</pre></body></html>\n");
 }
 
 int main()
 {
-    char* command = login();
-
-    if (strcmp(command, "")) {
-        printf("Content-type: text/html\n\n");
-        printf("<html><body><h1>Cure51 File Viewer</h1><p>Command executed: <code>%s</code></p><hr><pre>", command);
-
-        FILE *fp = popen(command, "r");
-        char buffer[1024];
-        while (fgets(buffer, sizeof(buffer), fp))
-        {
-            printf("%s", buffer);
-        }
-        pclose(fp);
-
-        printf("</pre></body></html>\n");
-    }
-
+    printf("Content-type: text/html\n\n");
+    login();
     return 0;
 }
