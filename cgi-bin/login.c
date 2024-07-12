@@ -89,7 +89,7 @@ void return_alert(char *output)
 }
 
 // Login to LDAP with the username & password
-void verify(char *username, char *password)
+bool verify(char *username, char *password)
 {
     LDAP *ld;
     int rc;
@@ -103,36 +103,27 @@ void verify(char *username, char *password)
     {
         fprintf(stderr, "ldap_initialize() failed: %d\n", rc);
         return_alert("Failed to initialize LDAP");
-        return;
+        return false;
     }
 
     rc = ldap_simple_bind_s(ld, decoded_username, decoded_password);
     if (rc != LDAP_SUCCESS)
     {
         fprintf(stderr, "ldap_simple_bind_s() failed: %d\n", rc);
-        return_alert("Failed to bind to LDAP");
-        return;
+        if (rc == 49) return_alert("Invalid credentials");
+        else return_alert("Failed to bind to LDAP");
+        return false;
     }
 
-    printf("Content-type: text/html\n\n");
-    printf("<html><body><h1>Welcome, %s</h1><pre>", decoded_username);
-
-    FILE *fp = popen("/bin/bash ./read-files.sh", "r");
-    char buffer[1024];
-    while (fgets(buffer, sizeof(buffer), fp))
-    {
-        printf("%s", buffer);
-    }
-    pclose(fp);
-
-    printf("</pre></body></html>\n");
+    return true;
 }
 
-void login()
+char* login()
 {
     char buf[512];
     char username[128] = {0};
     char password[128] = {0};
+    char* command = malloc (sizeof (char) * 128);
     int length;
 
     gets(buf);
@@ -160,13 +151,40 @@ void login()
             strcpy(username, data);
         else if (strcmp(name, "password") == 0)
             strcpy(password, data);
+        else if (strcmp(name, "command") == 0)
+            url_decode(data, command);
     }
 
-    verify(username, password);
+    if (verify(username, password)) {
+        if (strncmp(command, "cat", 3) == 0) {
+            return command;
+        } else {
+            return_alert("Invalid command");
+            return "";
+        }
+    } else {
+        return "";
+    }
 }
 
 int main()
 {
-    login();
+    char* command = login();
+
+    if (strcmp(command, "")) {
+        printf("Content-type: text/html\n\n");
+        printf("<html><body><h1>Cure51 File Viewer</h1><p>Command executed: <code>%s</code></p><hr><pre>", command);
+
+        FILE *fp = popen(command, "r");
+        char buffer[1024];
+        while (fgets(buffer, sizeof(buffer), fp))
+        {
+            printf("%s", buffer);
+        }
+        pclose(fp);
+
+        printf("</pre></body></html>\n");
+    }
+
     return 0;
 }
