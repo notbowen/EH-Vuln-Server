@@ -3,6 +3,12 @@
 This is a CGI web server that is vulnerable to a buffer overflow.
 I'll write about the steps to compile and run this binary later.
 
+UPDATE: While it is vulnerable to a buffer overflow, I could not
+find a reliable way to exploit it without making the entire application
+screw itself over :(
+
+Maybe I'll come back to this when my pwn skills get better.
+
 ## Structure
 
 CGI Login Binary <-> LDAP Server
